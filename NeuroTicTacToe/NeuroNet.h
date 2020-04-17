@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 #include <vector>
 #include <fstream>
 #include <math.h>
@@ -137,40 +137,40 @@ private:
 	vector<BiasNeuron> biases;
 
 public:
-	NeuroNet(int num) {
+	NeuroNet(string path) {
 
 		double gotten;
 		int hiddens, neurons;
-		string filePath = to_string(num) + ".txt";
+		string filePath = path;
 		ifstream file(filePath);
 		file.precision(17);
 
 		/*
-		1. колво скрытых слоев (z)
-		2. колво входных нейронов
-		3. z строк с количеством скрытых нейронов на слое
-		4. колво выходных нейронов
-		5. z+1 раз:
-			5.1 колво исходящих синапсов на слое
-			5.2 строка(вес синапса, выходной нейрон -> входной нейрон)
+		1. РєРѕР»РІРѕ СЃРєСЂС‹С‚С‹С… СЃР»РѕРµРІ (z)
+		2. РєРѕР»РІРѕ РІС…РѕРґРЅС‹С… РЅРµР№СЂРѕРЅРѕРІ
+		3. z СЃС‚СЂРѕРє СЃ РєРѕР»РёС‡РµСЃС‚РІРѕРј СЃРєСЂС‹С‚С‹С… РЅРµР№СЂРѕРЅРѕРІ РЅР° СЃР»РѕРµ
+		4. РєРѕР»РІРѕ РІС‹С…РѕРґРЅС‹С… РЅРµР№СЂРѕРЅРѕРІ
+		5. z+1 СЂР°Р·:
+			5.1 РєРѕР»РІРѕ РёСЃС…РѕРґСЏС‰РёС… СЃРёРЅР°РїСЃРѕРІ РЅР° СЃР»РѕРµ
+			5.2 СЃС‚СЂРѕРєР°(РІРµСЃ СЃРёРЅР°РїСЃР°, РІС‹С…РѕРґРЅРѕР№ РЅРµР№СЂРѕРЅ -> РІС…РѕРґРЅРѕР№ РЅРµР№СЂРѕРЅ)
 
 		*/
 
-		// вводим количество (скрытых) слоев и создаем соответствующие нейроны
+		// РІРІРѕРґРёРј РєРѕР»РёС‡РµСЃС‚РІРѕ (СЃРєСЂС‹С‚С‹С…) СЃР»РѕРµРІ Рё СЃРѕР·РґР°РµРј СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёРµ РЅРµР№СЂРѕРЅС‹
 		file >> hiddens;
 		for (int i = 0; i < hiddens; i++) {
 			vector<HidNeuron> vect;
 			hidLayer.push_back(vect);
 		}
 
-		// входной слой
+		// РІС…РѕРґРЅРѕР№ СЃР»РѕР№
 		file >> neurons;
 		for (int i = 0; i < neurons; i++) {
 			InNeuron iN = InNeuron();
 			inputLayer.push_back(iN);
 		}
 
-		// скрытые слои
+		// СЃРєСЂС‹С‚С‹Рµ СЃР»РѕРё
 		for (int j = 0; j < hiddens; j++) {
 			file >> neurons;
 			for (int i = 0; i < neurons; i++) {
@@ -179,14 +179,14 @@ public:
 			}
 		}
 
-		// выходной слой
+		// РІС‹С…РѕРґРЅРѕР№ СЃР»РѕР№
 		file >> neurons;
 		for (int i = 0; i < neurons; i++) {
 			OutNeuron oN = OutNeuron();
 			outLayer.push_back(oN);
 		}
 
-		// создание синапсов
+		// СЃРѕР·РґР°РЅРёРµ СЃРёРЅР°РїСЃРѕРІ
 		double synapses, tch, iWeight, iFrom, iTo;
 		string synapsInfo;
 		for (int j = 0; j < hiddens + 1; j++) {
@@ -199,22 +199,24 @@ public:
 				iTo = stod(synapsInfo.substr(synapsInfo.rfind(";") + 1, synapsInfo.size()));
 				Synaps *syn = new Synaps(iWeight);
 				if (j == 0) {
-					// входной слой -> первый скрытый слой
+					// РІС…РѕРґРЅРѕР№ СЃР»РѕР№ -> РїРµСЂРІС‹Р№ СЃРєСЂС‹С‚С‹Р№ СЃР»РѕР№
 					inputLayer[iFrom].AddOutSynaps(syn);
 					hidLayer[0][iTo].AddIntoSynaps(syn);
 				}
 				else if (j == hiddens) {
-					// последний скрытый слой -> выходной слой
+					// РїРѕСЃР»РµРґРЅРёР№ СЃРєСЂС‹С‚С‹Р№ СЃР»РѕР№ -> РІС‹С…РѕРґРЅРѕР№ СЃР»РѕР№
 					hidLayer[hiddens - 1][iFrom].AddOutSynaps(syn);
 					outLayer[iTo].AddIntoSynaps(syn);
 				}
 				else {
-					// скрытый слой -> скрытый слой
+					// СЃРєСЂС‹С‚С‹Р№ СЃР»РѕР№ -> СЃРєСЂС‹С‚С‹Р№ СЃР»РѕР№
 					hidLayer[j - 1][iFrom].AddOutSynaps(syn);
 					hidLayer[j][iTo].AddIntoSynaps(syn);
 				}
 			}
 		}
+
+		file.close();
 
 	}
 
@@ -222,7 +224,7 @@ public:
 
 		vector<double> retVal;
 
-		// проход по всем слоям сети с последовательными вычислениями значений
+		// РїСЂРѕС…РѕРґ РїРѕ РІСЃРµРј СЃР»РѕСЏРј СЃРµС‚Рё СЃ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅС‹РјРё РІС‹С‡РёСЃР»РµРЅРёСЏРјРё Р·РЅР°С‡РµРЅРёР№
 
 		for (int i = 0; i < inputLayer.size(); i++) {
 			inputLayer[i].SetInput(inVector[i]);

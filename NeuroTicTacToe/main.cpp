@@ -1,4 +1,4 @@
-#include <iostream>
+п»ї#include <iostream>
 #include <vector>
 #include <fstream>
 #include <string>
@@ -8,7 +8,7 @@
 using namespace std;
 
 
-/* Ввод корректного хода с консоли */
+/* Р’РІРѕРґ РєРѕСЂСЂРµРєС‚РЅРѕРіРѕ С…РѕРґР° СЃ РєРѕРЅСЃРѕР»Рё */
 int GetMoveCons(vector<int> field) {
 	int x;
 	do {
@@ -24,7 +24,7 @@ int main() {
 	TicTacToeClass tte = TicTacToeClass();
 	vector<int> field;
 
-	/* Процесс игры *//*
+	/* РџСЂРѕС†РµСЃСЃ РёРіСЂС‹ *//*
 	for (int i = 0; i < 9; i++) {
 		tte.ShowField();
 		tte.Move(GetMoveCons(tte.GetField()));
@@ -33,7 +33,7 @@ int main() {
 		}
 	}
 
-	/* Вывод победителя *//*
+	/* Р’С‹РІРѕРґ РїРѕР±РµРґРёС‚РµР»СЏ *//*
 	tte.ShowField();
 	cout << "Won player " << tte.CheckEnd() << endl;
 	system("pause");
@@ -41,8 +41,6 @@ int main() {
 }*/
 
 int main() {
-
-	int one = 1;
 
 	cout.precision(17);
 
@@ -54,7 +52,7 @@ int main() {
 	vector<double> toTest = { 1, 1 };
 	vector<double> getTest;
 
-	NeuroNet xorNet = NeuroNet(one);
+	NeuroNet xorNet = NeuroNet("1.txt");
 
 	getTest = xorNet.Work(toTest);
 

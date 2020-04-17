@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 #include <iostream>
 #include <string>
 #include <vector>
@@ -13,11 +13,12 @@ private:
 	/*	0 1 2
 		3 4 5
 		6 7 8	*/
-		/* Какой игрок ходит */
+
+		/* РљР°РєРѕР№ РёРіСЂРѕРє С…РѕРґРёС‚ */
 	vector<int> Field;
 	int playerMove;
 
-	/* Ходы игроков */
+	/* РҐРѕРґС‹ РёРіСЂРѕРєРѕРІ */
 	void Player1Move(int move) {
 		Field[move] = 1;
 	}
@@ -27,7 +28,7 @@ private:
 
 public:
 
-	/* Процесс игры */
+	/* РџСЂРѕС†РµСЃСЃ РёРіСЂС‹ */
 	TicTacToeClass() {
 		int i, count = 0;
 		for (i = 0; i < 9; i++) {
@@ -36,7 +37,7 @@ public:
 		playerMove = 1;
 	};
 
-	/* Попеременный ход игроков */
+	/* РџРѕРїРµСЂРµРјРµРЅРЅС‹Р№ С…РѕРґ РёРіСЂРѕРєРѕРІ */
 	void Move(int move) {
 		if (playerMove == 1) {
 			Player1Move(move);
@@ -47,12 +48,12 @@ public:
 		playerMove *= -1;
 	}
 
-	/* Возвращает поле в формате массива чисел */
+	/* Р’РѕР·РІСЂР°С‰Р°РµС‚ РїРѕР»Рµ РІ С„РѕСЂРјР°С‚Рµ РјР°СЃСЃРёРІР° С‡РёСЃРµР» */
 	vector<int> GetField() {
 		return(Field);
 	}
 
-	/* Проверка на победу одного из игроков */
+	/* РџСЂРѕРІРµСЂРєР° РЅР° РїРѕР±РµРґСѓ РѕРґРЅРѕРіРѕ РёР· РёРіСЂРѕРєРѕРІ */
 	int CheckEnd() {
 		if (Field[0] == Field[1] && Field[1] == Field[2] && Field[1] != 0) {
 			return(Field[1]);
@@ -81,7 +82,7 @@ public:
 		return(0);
 	}
 
-	/* Вывод поля на экран для игроков */
+	/* Р’С‹РІРѕРґ РїРѕР»СЏ РЅР° СЌРєСЂР°РЅ РґР»СЏ РёРіСЂРѕРєРѕРІ */
 	void ShowField() {
 		system("cls");
 		cout << "  " << Field[0] << "  " << Field[1] << "  " << Field[2] << endl;
