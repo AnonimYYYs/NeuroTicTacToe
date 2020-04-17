@@ -8,17 +8,6 @@
 using namespace std;
 
 
-/* Ввод корректного хода с консоли */
-int GetMoveCons(vector<int> field) {
-	int x;
-	do {
-		cin >> x;
-	} while (x < 0 || x > 8 || field[x] != 0);
-	return(x);
-}
-
-int GetMoveNeuro();
-
 /*
 int main() {
 
@@ -26,6 +15,17 @@ int main() {
 //игра в кресики - нолики, ходы вводятся в консоли (поле описано в заголовке TicTacToeClass)
 //-------------------------------------------------------------------------------------------
 
+	 //Ввод корректного хода с консоли 
+	int GetMoveCons(vector<int> field) {
+		int x;
+		do {
+			cin >> x;
+		} while (x < 0 || x > 8 || field[x] != 0);
+		return(x);
+	}	
+
+	int GetMoveNeuro();
+	
 	TicTacToeClass tte = TicTacToeClass();
 	vector<int> field;
 
@@ -46,21 +46,20 @@ int main() {
 }*/
 
 
-
-
 int main() {
 
 //--------------------------------------------------------------------------------
-// пример нейросети, решающей xor, строит нейросеть на основе данных в файле 1.txt
+// пример нейросети, решающей xor, строит нейросеть на основе данных в файле test.txt
 //--------------------------------------------------------------------------------
 
 	cout.precision(17);
 
 
-	vector<double> toTest = { 1, 1 }; //
+	vector<double> toTest = { 1, 1 }; 
 	vector<double> getTest;
+	
 
-	NeuroNet xorNet = NeuroNet("1.txt");
+	NeuroNet xorNet = NeuroNet("test.txt");
 
 	getTest = xorNet.Work(toTest);
 
@@ -69,6 +68,9 @@ int main() {
 	}
 
 
+
 	system("pause");
 	return(0);
 }
+
+

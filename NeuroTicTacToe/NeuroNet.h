@@ -7,11 +7,16 @@
 using namespace std;
 
 class Synaps {
+
+	// синапс. получает значение от одного нейрона, передает другому значение * вес этого синапса
+
 private:
-	double weight;
+	string rawData; // инфо о контактах синапса формата ";12;4;1;6" - синапс от 12 нейрона 4 слоя к 4 нейрону 6 слоя
+	double weight; // вес синапса 
 	double into;
 public:
-	Synaps(double newWeight) {
+	Synaps(double newWeight, string data) {
+		rawData = data;
 		weight = newWeight;
 	}
 
@@ -26,13 +31,16 @@ public:
 	double Give() {
 		return(into * weight);
 	}
+
+	string Info() {
+		return(to_string(weight) + rawData);
+	}
 };
 
 class InNeuron {
 private:
 	double gotValue;
 	vector<Synaps*> outSynapses;
-
 public:
 	InNeuron() {};
 
@@ -48,6 +56,14 @@ public:
 		for (int i = 0; i < outSynapses.size(); i++) {
 			outSynapses[i]->Get(gotValue);
 		}
+	}
+
+	vector<string> SynapsesData() {
+		vector<string> data;
+		for (int i = 0; i < outSynapses.size(); i++) {
+			data.push_back(outSynapses[i]->Info());
+		}
+		return(data);
 	}
 
 };
@@ -83,6 +99,15 @@ public:
 			outSynapses[i]->Get(result);
 		}
 	}
+
+	vector<string> SynapsesData() {
+		vector<string> data;
+		for (int i = 0; i < outSynapses.size(); i++) {
+			data.push_back(outSynapses[i]->Info());
+		}
+		return(data);
+	}
+
 };
 
 class OutNeuron {
@@ -135,89 +160,131 @@ private:
 	vector<vector<HidNeuron>> hidLayer;
 	vector<OutNeuron> outLayer;
 	vector<BiasNeuron> biases;
+	string filePath;
+	int synAmount;
+	
 
 public:
 	NeuroNet(string path) {
-
-		double gotten;
-		int hiddens, neurons;
-		string filePath = path;
+		filePath = path;
 		ifstream file(filePath);
 		file.precision(17);
 
+		int layersAmount, synapsAmount, neuroAmount;
+
 		/*
-		1. колво скрытых слоев (z)
-		2. колво входных нейронов
-		3. z строк с количеством скрытых нейронов на слое
-		4. колво выходных нейронов
-		5. z+1 раз:
-			5.1 колво исходящих синапсов на слое
-			5.2 строка(вес синапса, выходной нейрон -> входной нейрон)
-
+		считывание инфо о сети с файла
+		первая строка - количество слоев (layersAmount)
+		потом layersAmount строк с количеством нейронов на каждой
+		потом количество синапос (synapsAmount)
+		потом synapsAmount строк с инфо о каждом синапсе
 		*/
-
-		// вводим количество (скрытых) слоев и создаем соответствующие нейроны
-		file >> hiddens;
-		for (int i = 0; i < hiddens; i++) {
-			vector<HidNeuron> vect;
-			hidLayer.push_back(vect);
-		}
+		file >> layersAmount;
+		
 
 		// входной слой
-		file >> neurons;
-		for (int i = 0; i < neurons; i++) {
+		file >> neuroAmount;
+		for (int i = 0; i < neuroAmount; i++) {
 			InNeuron iN = InNeuron();
 			inputLayer.push_back(iN);
 		}
 
 		// скрытые слои
-		for (int j = 0; j < hiddens; j++) {
-			file >> neurons;
-			for (int i = 0; i < neurons; i++) {
+		for (int j = 0; j < (layersAmount - 2); j++) {
+			file >> neuroAmount;
+			vector<HidNeuron> layer;
+			hidLayer.push_back(layer);
+			for (int i = 0; i < neuroAmount; i++) {
 				HidNeuron hN = HidNeuron();
 				hidLayer[j].push_back(hN);
 			}
 		}
 
 		// выходной слой
-		file >> neurons;
-		for (int i = 0; i < neurons; i++) {
+		file >> neuroAmount;
+		for (int i = 0; i < neuroAmount; i++) {
 			OutNeuron oN = OutNeuron();
 			outLayer.push_back(oN);
 		}
 
-		// создание синапсов
-		double synapses, tch, iWeight, iFrom, iTo;
-		string synapsInfo;
-		for (int j = 0; j < hiddens + 1; j++) {
-			file >> synapses;
+		// ввод синапсов
+		// формат *вес;слой откуда;нейрон откуда;слой куда;нейрон куда*
+		file >> synapsAmount;
+		synAmount = synapsAmount;
+		for (int i = 0; i < synapsAmount; i++) {
+			string synapsRawData;
+			int layerFrom, neuroFrom, layerTo, neuroTo;
+			file >> synapsRawData;
+			// создание синапса
+			Synaps *synaps = new Synaps(stod(synapsRawData.substr(0, synapsRawData.find(";"))), synapsRawData.substr(synapsRawData.find(";"), synapsRawData.size()));
+			// определение нейронов которые он связывает
+			synapsRawData = synapsRawData.substr(synapsRawData.find(";") + 1, synapsRawData.size());
+			layerFrom = stoi(synapsRawData.substr(0, synapsRawData.find(";"))); // слой откуда
+			synapsRawData = synapsRawData.substr(synapsRawData.find(";") + 1, synapsRawData.size());
+			neuroFrom = stoi(synapsRawData.substr(0, synapsRawData.find(";"))); // нейрон откуда
+			synapsRawData = synapsRawData.substr(synapsRawData.find(";") + 1, synapsRawData.size());
+			layerTo = stoi(synapsRawData.substr(0, synapsRawData.find(";"))); // слой куда
+			synapsRawData = synapsRawData.substr(synapsRawData.find(";") + 1, synapsRawData.size());
+			neuroTo = stoi(synapsRawData); // нейрон куда
+			
+			// откуда выходит
+			if (layerFrom == 0) {
+				inputLayer[neuroFrom].AddOutSynaps(synaps);
+			}
+			else {
+				hidLayer[layerFrom - 1][neuroFrom].AddOutSynaps(synaps);
+			}
 
-			for (int i = 0; i < synapses; i++) {
-				file >> synapsInfo;
-				iWeight = stod(synapsInfo.substr(0, synapsInfo.find(";")));
-				iFrom = stod(synapsInfo.substr(synapsInfo.find(";") + 1, synapsInfo.rfind(";") - synapsInfo.find(";") - 1));
-				iTo = stod(synapsInfo.substr(synapsInfo.rfind(";") + 1, synapsInfo.size()));
-				Synaps *syn = new Synaps(iWeight);
-				if (j == 0) {
-					// входной слой -> первый скрытый слой
-					inputLayer[iFrom].AddOutSynaps(syn);
-					hidLayer[0][iTo].AddIntoSynaps(syn);
-				}
-				else if (j == hiddens) {
-					// последний скрытый слой -> выходной слой
-					hidLayer[hiddens - 1][iFrom].AddOutSynaps(syn);
-					outLayer[iTo].AddIntoSynaps(syn);
-				}
-				else {
-					// скрытый слой -> скрытый слой
-					hidLayer[j - 1][iFrom].AddOutSynaps(syn);
-					hidLayer[j][iTo].AddIntoSynaps(syn);
+			// куда входит
+			if (layerTo == hidLayer.size() + 1) {
+				outLayer[neuroTo].AddIntoSynaps(synaps);
+			}
+			else {
+				hidLayer[layerTo - 1][neuroTo].AddIntoSynaps(synaps);
+			}
+
+		}
+
+		file.close();
+
+	}
+
+	~NeuroNet() {
+		ofstream file(filePath);
+		/*
+		ввод обратно в файл
+		первая строка - количество слоев (layersAmount)
+		потом layersAmount строк с количеством нейронов на каждой
+		потом количество синапос (synapsAmount)
+		потом synapsAmount строк с инфо о каждом синапсе
+		*/
+
+		file << (hidLayer.size() + 2) << endl;
+		file << inputLayer.size() << endl;
+		for (int i = 0; i < hidLayer.size(); i++) {
+			file << hidLayer[i].size() << endl;
+		}
+		file << outLayer.size() << endl;
+		
+		file << synAmount;
+		
+		for (int i = 0; i < inputLayer.size(); i++) {
+			vector<string> synapsesData = inputLayer[i].SynapsesData();
+			for (int k = 0; k < synapsesData.size(); k++) {
+				file << synapsesData[k] << endl;
+			}
+		}
+		
+		for (int j = 0; j < hidLayer.size(); j++) {
+			for (int i = 0; i < hidLayer[j].size(); i++) {
+				vector<string> synapsesData = hidLayer[j][i].SynapsesData();
+				for (int k = 0; k < synapsesData.size(); k++) {
+					file << synapsesData[k] << endl;
 				}
 			}
 		}
 
 		file.close();
-
 	}
 
 	vector<double> Work(vector<double> inVector) {
