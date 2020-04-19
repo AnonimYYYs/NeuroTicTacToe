@@ -49,8 +49,12 @@ public:
 	}
 
 	/* Возвращает поле в формате массива чисел */
-	vector<int> GetField() {
-		return(Field);
+	vector<double> GetField() {
+		vector<double> toRet;
+		for (int i = 0; i < Field.size(); i++) {
+			toRet.push_back(Field[i]);
+		}
+		return(toRet);
 	}
 
 	/* Проверка на победу одного из игроков */

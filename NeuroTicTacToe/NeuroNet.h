@@ -175,11 +175,24 @@ public:
 		outSynapses.push_back(outSynaps);
 	}
 
-	void throwResult() {
+	void ThrowResult() {
 		for (int i = 0; i < outSynapses.size(); i++) {
 			outSynapses[i]->Get(1);
 		}
 	}
+
+	int SynAmount() {
+		return(outSynapses.size());
+	}
+
+	vector<string> SynapsesData() {
+		vector<string> data;
+		for (int i = 0; i < outSynapses.size(); i++) {
+			data.push_back(outSynapses[i]->Info());
+		}
+		return(data);
+	}
+
 };
 
 class NeuroNet {
@@ -199,6 +212,9 @@ private:
 			for (int i = 0; i < hidLayer[j].size(); i++) {
 				synapsesAmount += hidLayer[j][i].SynAmount();
 			}
+		}
+		for (int i = 0; i < biases.size(); i++) {
+			synapsesAmount += biases[i].SynAmount();
 		}
 		return(synapsesAmount);
 	}
@@ -249,6 +265,7 @@ public:
 
 		// ввод синапсов
 		// формат *вес;слой откуда;нейрон откуда;слой куда;нейрон куда*
+		// если в *нейрон откуда* -1, то этот нейрон - смещения
 		file >> synapsAmount;
 		for (int i = 0; i < synapsAmount; i++) {
 			string synapsRawData;
@@ -267,11 +284,16 @@ public:
 			neuroTo = stoi(synapsRawData); // нейрон куда
 			
 			// откуда выходит
-			if (layerFrom == 0) {
-				inputLayer[neuroFrom].AddOutSynaps(synaps);
-			}
+			if (neuroFrom == -1) {
+				biases[layerFrom].AddOutSynaps(synaps);
+			} 
 			else {
-				hidLayer[layerFrom - 1][neuroFrom].AddOutSynaps(synaps);
+				if (layerFrom == 0) {
+					inputLayer[neuroFrom].AddOutSynaps(synaps);
+				}
+				else {
+					hidLayer[layerFrom - 1][neuroFrom].AddOutSynaps(synaps);
+				}
 			}
 
 			// куда входит
@@ -301,7 +323,7 @@ public:
 		for (int j = 0; j < layers.size() - 2; j++) {
 			vector<HidNeuron> layer;
 			hidLayer.push_back(layer);
-			for (int i = 0; i < layers[j]; i++) {
+			for (int i = 0; i < layers[j + 1]; i++) {
 				HidNeuron hN = HidNeuron();
 				hidLayer[j].push_back(hN);
 			}
@@ -314,8 +336,54 @@ public:
 		
 		// создаются синапсы, инициализированные единицами
 		for (int i = 0; i < inputLayer.size(); i++) {
-			//todo!!!
+			for (int j = 0; j < hidLayer[0].size(); j++) {
+				string rawData = ";0;" + to_string(i) + ";1;" + to_string(j);
+				Synaps *syn = new Synaps(1, rawData);
+				inputLayer[i].AddOutSynaps(syn);
+				hidLayer[0][j].AddIntoSynaps(syn);
+			}
 		}
+		for (int k = 0; k < hidLayer.size() - 1; k++) {
+			for (int i = 0; i < hidLayer[k].size(); i++) {
+				for (int j = 0; j < hidLayer[k + 1].size(); j++) {
+					string rawData = ";" + to_string(k + 1) + ";" + to_string(i) + ";" + to_string(k + 2) + ";" + to_string(j);
+					Synaps *syn = new Synaps(1, rawData);
+					hidLayer[k][i].AddOutSynaps(syn);
+					hidLayer[k + 1][j].AddIntoSynaps(syn);
+				}
+			}
+		}
+		for (int i = 0; i < hidLayer[hidLayer.size() - 1].size(); i++) {
+			for (int j = 0; j < outLayer.size(); j++) {
+				string rawData = ";" + to_string(hidLayer.size()) + ";" + to_string(i) + ";" + to_string(hidLayer.size() + 1) + ";" + to_string(j);
+				Synaps *syn = new Synaps(1, rawData);
+				hidLayer[hidLayer.size() - 1][i].AddOutSynaps(syn);
+				outLayer[j].AddIntoSynaps(syn);
+			}
+		}
+
+		// создаются нейроны смещения
+		
+		
+		for (int j = 0; j < hidLayer.size(); j++) {
+			BiasNeuron bi = BiasNeuron();
+			biases.push_back(bi);
+			for (int i = 0; i < hidLayer[j].size(); i++) {
+				string rawData = ";" + to_string(j) + ";-1;" + to_string(j + 1) + ";" + to_string(i);
+				Synaps *syn = new Synaps(-1, rawData);
+				biases[j].AddOutSynaps(syn);
+				hidLayer[j][i].AddIntoSynaps(syn);
+			}
+		}
+		BiasNeuron bi = BiasNeuron();
+		biases.push_back(bi);
+		for (int i = 0; i < outLayer.size(); i++) {
+			string rawData = ";" + to_string(hidLayer.size()) + ";-1;" + to_string(hidLayer.size() + 1) + ";" + to_string(i);
+			Synaps *syn = new Synaps(-1, rawData);
+			biases[biases.size() - 1].AddOutSynaps(syn);
+			outLayer[i].AddIntoSynaps(syn);
+		}
+		
 
 	}
 
@@ -354,6 +422,13 @@ public:
 			}
 		}
 
+		for (int i = 0; i < biases.size(); i++) {
+			vector<string> synapsesData = biases[i].SynapsesData();
+			for (int j = 0; j < synapsesData.size(); j++) {
+				file << synapsesData[j] << endl;
+			}
+		}
+
 		file.close();
 	}
 
@@ -374,6 +449,12 @@ public:
 	vector<double> Work(vector<double> inVector) {
 
 		vector<double> retVal;
+
+		// сразу закинем все значения нейронов смещения в синапсы
+
+		for (int i = 0; i < biases.size(); i++) {
+			biases[i].ThrowResult();
+		}
 
 		// проход по всем слоям сети с последовательными вычислениями значений
 
@@ -396,5 +477,6 @@ public:
 
 		return(retVal);
 	}
+
 
 };
