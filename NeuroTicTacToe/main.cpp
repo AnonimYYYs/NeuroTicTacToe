@@ -47,30 +47,21 @@ int main() {
 
 
 int main() {
+	
+	vector<double> inVect = { 1, 1, 1 };
+	vector<double> outVect;
 
-//--------------------------------------------------------------------------------
-// пример нейросети, решающей xor, строит нейросеть на основе данных в файле test.txt
-//--------------------------------------------------------------------------------
+	string path = "test.txt";
+	NeuroNet net = NeuroNet(path);
+	outVect = net.Work(inVect);
+	
 
 	cout.precision(17);
 
-
-	vector<double> toTest = { 1, 1 }; 
-	vector<double> getTest;
-	
-
-	NeuroNet xorNet = NeuroNet("test.txt");
-
-	getTest = xorNet.Work(toTest);
-
-	for (int i = 0; i < getTest.size(); i++) {
-		cout << getTest[i] << endl;
+	for (int i = 0; i < outVect.size(); i++) {
+		cout << outVect[i] << endl;
 	}
-
-
 
 	system("pause");
 	return(0);
 }
-
-

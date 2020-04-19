@@ -44,6 +44,17 @@ private:
 public:
 	InNeuron() {};
 
+	void DestroySynapses() {
+		if (outSynapses.size() > 0) {
+			Synaps *synAt;
+			while (outSynapses.size() > 0) {
+				synAt = outSynapses[outSynapses.size() - 1];
+				outSynapses.pop_back();
+				delete synAt;
+			}
+		}
+	}
+
 	void AddOutSynaps(Synaps* outSynaps) {
 		outSynapses.push_back(outSynaps);
 	}
@@ -66,6 +77,9 @@ public:
 		return(data);
 	}
 
+	int SynAmount() {
+		return(outSynapses.size());
+	}
 };
 
 class HidNeuron {
@@ -108,6 +122,20 @@ public:
 		return(data);
 	}
 
+	void DestroySynapses() {
+		if (outSynapses.size() > 0) {
+			Synaps *synAt;
+			while (outSynapses.size() > 0) {
+				synAt = outSynapses[outSynapses.size() - 1];
+				outSynapses.pop_back();
+				delete synAt;
+			}
+		}
+	}
+
+	int SynAmount() {
+		return(outSynapses.size());
+	}
 };
 
 class OutNeuron {
@@ -161,11 +189,23 @@ private:
 	vector<OutNeuron> outLayer;
 	vector<BiasNeuron> biases;
 	string filePath;
-	int synAmount;
-	
+
+	int SynAmount() {
+		int synapsesAmount = 0;
+		for (int i = 0; i < inputLayer.size(); i++) {
+			synapsesAmount += inputLayer[i].SynAmount();
+		}
+		for (int j = 0; j < hidLayer.size(); j++) {
+			for (int i = 0; i < hidLayer[j].size(); i++) {
+				synapsesAmount += hidLayer[j][i].SynAmount();
+			}
+		}
+		return(synapsesAmount);
+	}
 
 public:
 	NeuroNet(string path) {
+		// создание нейросети на основе данных из файла
 		filePath = path;
 		ifstream file(filePath);
 		file.precision(17);
@@ -210,7 +250,6 @@ public:
 		// ввод синапсов
 		// формат *вес;слой откуда;нейрон откуда;слой куда;нейрон куда*
 		file >> synapsAmount;
-		synAmount = synapsAmount;
 		for (int i = 0; i < synapsAmount; i++) {
 			string synapsRawData;
 			int layerFrom, neuroFrom, layerTo, neuroTo;
@@ -249,6 +288,37 @@ public:
 
 	}
 
+	NeuroNet(string path, vector<int> layers) {
+		// создание нейросети по количеству слоев и нейронов на каждом, все нейроны Н слоя соединены со всеми нейронами Н+1 слоя
+		filePath = path;
+		
+		// создаются нейроны
+		for (int i = 0; i < layers[0]; i++) {
+			InNeuron iN = InNeuron();
+			inputLayer.push_back(iN);
+		}
+
+		for (int j = 0; j < layers.size() - 2; j++) {
+			vector<HidNeuron> layer;
+			hidLayer.push_back(layer);
+			for (int i = 0; i < layers[j]; i++) {
+				HidNeuron hN = HidNeuron();
+				hidLayer[j].push_back(hN);
+			}
+		}
+
+		for (int i = 0; i < layers[layers.size() - 1]; i++) {
+			OutNeuron oN = OutNeuron();
+			outLayer.push_back(oN);
+		}
+		
+		// создаются синапсы, инициализированные единицами
+		for (int i = 0; i < inputLayer.size(); i++) {
+			//todo!!!
+		}
+
+	}
+
 	~NeuroNet() {
 		ofstream file(filePath);
 		/*
@@ -266,7 +336,7 @@ public:
 		}
 		file << outLayer.size() << endl;
 		
-		file << synAmount;
+		file << SynAmount() << endl;
 		
 		for (int i = 0; i < inputLayer.size(); i++) {
 			vector<string> synapsesData = inputLayer[i].SynapsesData();
@@ -285,6 +355,20 @@ public:
 		}
 
 		file.close();
+	}
+
+	void DestroySynapses() {
+		// удаление всех синапсов. использование NeuroNet(string, vector<int>); и после DestroySynapses(); позволяет создать сеть с заданными слоями но без связей
+		Synaps *synAt;
+		for (int i = 0; i < inputLayer.size(); i++) {
+			inputLayer[i].DestroySynapses();
+		}
+		for (int j = 0; j < hidLayer.size(); j++) {
+			for (int i = 0; i < hidLayer[j].size(); i++) {
+				hidLayer[j][i].DestroySynapses();
+			}
+		}
+
 	}
 
 	vector<double> Work(vector<double> inVector) {
@@ -312,4 +396,5 @@ public:
 
 		return(retVal);
 	}
+
 };
