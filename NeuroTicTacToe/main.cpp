@@ -48,22 +48,12 @@ int main() {
 
 int main() {
 	
-	vector<double> inVect = { 1,1 };
-	vector<double> outVect;
-	vector<int> layers = { 2, 3, 2, 1 };
-
-	string path = "test.txt";
+	// туттуру
 	
-	NeuroNet net = NeuroNet(path, layers);
-	outVect = net.Work(inVect);
+	// *карманные часы остановились*
 	
 
-	cout.precision(17);
 
-	for (int i = 0; i < outVect.size(); i++) {
-		cout << outVect[i] << endl;
-	}
-	
 
 	system("pause");
 	return(0);
