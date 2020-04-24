@@ -47,13 +47,27 @@ int main() {
 
 
 int main() {
-	
-	// туттуру
-	
-	// *карманные часы остановились*
-	
+	cout.precision(17);
 
+	/*-- xor example --*/
+	vector<int> layers = { 2, 2, 1 };
+	NeuroNet net = NeuroNet(layers);
+	vector<SynapsLocation> synapses;
+	synapses.push_back({ 0.987, 0, 0, 1, 0 });
+	synapses.push_back({ 8.033, 0, 0, 1, 1 });
+	synapses.push_back({ 0.987, 0, 1, 1, 0 });
+	synapses.push_back({ 8.033, 0, 1, 1, 1 });
+	synapses.push_back({ -90.284, 1, 0, 2, 0 });
+	synapses.push_back({ 72.690, 1, 1, 2, 0 });
+	net.add_synapses(synapses);
 
+		/*-- xor input --*/
+	vector<double> inVect = { 0, 0 };
+	vector<double> outVect = net.work(inVect);
+	for (int i = 0; i < outVect.size(); i++) {
+		cout << outVect[i] << endl;
+	}
+	/*-- end example --*/
 
 	system("pause");
 	return(0);
