@@ -48,20 +48,30 @@ int main() {
 
 int main() {
 	cout.precision(17);
+	
+	
 
 	/*-- xor example --*/
 	vector<int> layers = { 2, 2, 1 };
 	NeuroNet net = NeuroNet(layers);
 	vector<SynapsLocation> synapses;
-	synapses.push_back({ 0.987, 0, 0, 1, 0 });
-	synapses.push_back({ 8.033, 0, 0, 1, 1 });
-	synapses.push_back({ 0.987, 0, 1, 1, 0 });
-	synapses.push_back({ 8.033, 0, 1, 1, 1 });
-	synapses.push_back({ -90.284, 1, 0, 2, 0 });
-	synapses.push_back({ 72.690, 1, 1, 2, 0 });
+	synapses.push_back({ random(), 0, 0, 1, 0 });
+	synapses.push_back({ random(), 0, 0, 1, 1 });
+	synapses.push_back({ random(), 0, 1, 1, 0 });
+	synapses.push_back({ random(), 0, 1, 1, 1 });
+	synapses.push_back({ random(), 1, 0, 2, 0 });
+	synapses.push_back({ random(), 1, 1, 2, 0 });
 	net.add_synapses(synapses);
 
-		/*-- xor input --*/
+	vector<Set> teachSet;
+	teachSet.push_back({ { 1, 0 }, { 1 } });
+	teachSet.push_back({ { 1, 1 }, { 0 } });
+	teachSet.push_back({ { 0, 1 }, { 1 } });
+	teachSet.push_back({ { 0, 0 }, { 0 } });
+
+	net.teacher_learn(teachSet, 1000);
+
+		/*-- xor input --*
 	vector<double> inVect = { 0, 0 };
 	vector<double> outVect = net.work(inVect);
 	for (int i = 0; i < outVect.size(); i++) {
